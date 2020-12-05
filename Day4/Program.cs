@@ -28,7 +28,7 @@ namespace Day4
 
             for (int i = 0; i < Input.Length; i++)
             {
-                Console.WriteLine(Input[i]);
+//                Console.WriteLine(Input[i]);
 
                 // Lines are composed of name value pairs split by spaces
                 string[] nvPairs = Input[i].Split(' ');
@@ -44,29 +44,37 @@ namespace Day4
                             switch (nv[0])
                             {
                                 case "byr":
-                                    valueOk = int.TryParse(nv[1], out int year) && year >= 1920 && year <= 2002;
+                                    valueOk = nv[1].Length == 4 && 
+                                        int.TryParse(nv[1], out int year) && 
+                                        year >= 1920 && year <= 2002;
                                     break;
                                 case "iyr":
-                                    valueOk = int.TryParse(nv[1], out year) && year >= 2010 && year <= 2020;
+                                    valueOk = nv[1].Length == 4 && 
+                                        int.TryParse(nv[1], out year) && 
+                                        year >= 2010 && year <= 2020;
                                     break;
                                 case "eyr":
-                                    valueOk = int.TryParse(nv[1], out year) && year >= 2020 && year <= 2030;
+                                    valueOk = nv[1].Length == 4 && 
+                                        int.TryParse(nv[1], out year) && 
+                                        year >= 2020 && year <= 2030;
                                     break;
                                 case "hgt":
-                                    var match = Regex.Match(nv[1].Trim(), "([0-9]+)(cm|in)");
-                                    valueOk = match.Success &&
-                                        ((match.Groups[2].Value == "cm" && 
-                                            (int.Parse(match.Groups[1].Value) >= 150 && int.Parse(match.Groups[1].Value) <= 193)) || 
-                                        (int.Parse(match.Groups[1].Value) >= 59 && int.Parse(match.Groups[1].Value) <= 76));
+                                    var match = Regex.Match(nv[1].Trim(), "^([0-9]+)(cm|in)$");
+                                    if (match.Success)
+                                    {
+                                        valueOk = match.Groups[2].Value == "cm" ?
+                                            int.Parse(match.Groups[1].Value) >= 150 && int.Parse(match.Groups[1].Value) <= 193 :
+                                            int.Parse(match.Groups[1].Value) >= 59 && int.Parse(match.Groups[1].Value) <= 76;
+                                    }
                                     break;
                                 case "hcl":
-                                    valueOk = Regex.Match(nv[1], "#([0-9]|[a-f]){6}").Success;
+                                    valueOk = Regex.Match(nv[1], "^#([0-9]|[a-f|A-F]){6}$").Success;
                                     break;
                                 case "ecl":
                                     valueOk = ValidEyeColours.Contains(nv[1]);
                                     break;
                                 case "pid":
-                                    valueOk = Regex.Match(nv[1], "[0-9]{9}").Success;
+                                    valueOk = Regex.Match(nv[1], "^[0-9]{9}$").Success;
                                     break;
                                 case "cid":
                                     valueOk = true;
@@ -101,6 +109,7 @@ namespace Day4
 
             return (totalPassports, validPassports);
         }
+
         static string[] Input =
             @"eyr:2033
 hgt:177cm pid:173cm
