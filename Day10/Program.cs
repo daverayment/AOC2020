@@ -4,8 +4,8 @@ using System.Linq;
 using System.IO;
 using System.Diagnostics;
 
-List<int> Input = new List<int> { 0 };
-Input.AddRange(File.ReadAllLines("InputMedium.txt").Select(x => int.Parse(x)).OrderBy(x => x));
+var Input = new List<int> { 0 };
+Input.AddRange(File.ReadAllLines("Input.txt").Select(x => int.Parse(x)).OrderBy(x => x));
 Input.Add(Input[^1] + 3);
 
 int ones = 1;
@@ -26,46 +26,36 @@ for (int i = 0; i < Input.Count - 1; i++)
 
 Console.WriteLine($"Q1: {ones * threes}");
 
+Dictionary<int, long> pathLength = new();
+List<int> visited = new();
+var work = new Queue<int>();
+work.Enqueue(0);
+pathLength[0] = 1;
 
-// How many valid adapters can be reached from each node?
-int[] routesForward = new int[Input.Count - 1];
-
-for (int i = 0; i < Input.Count - 1; i++)
+do
 {
-    routesForward[i] = 1;
-    int plusOneDiff = Input[i + 1] - Input[i];
-    int plusTwoDiff = i < Input.Count - 2 ? Input[i + 2] - Input[i] : int.MaxValue;
-    int plusThreeDiff = i < Input.Count - 3 ? Input[i + 3] - Input[i] : int.MaxValue;
-
-    if (plusOneDiff == 3)
+    if (!work.TryDequeue(out int current))
     {
-        // Only one route ahead because the difference is the maximum of 3
-        continue;
+        break;
     }
-    if (plusTwoDiff <= 3)
+    foreach (int adapter in Input.Where(x => x > current && x <= current + 3))
     {
-        routesForward[i] = 2;
+        if (pathLength.ContainsKey(adapter))
+        {
+            pathLength[adapter] += pathLength[current];
+        }
+        else 
+        {
+            pathLength[adapter] = pathLength[current];
+        }
+
+        // Add this to be processed if we haven't dealt with it previously
+        if (!visited.Contains(adapter))
+        {
+            work.Enqueue(adapter);
+            visited.Add(adapter);
+        }
     }
-    if (plusThreeDiff == 3)
-    {
-        // Implies previous two differences were 1 also
-        routesForward[i] = 3;
-    }
-}
+} while(true);
 
-long wf = 0;
-WaysForward(0, wf);
-
-
-long totalRoutes = 1;
-for (int i = routesForward.Length - 1; i >= 0; i--)
-{
-    totalRoutes *= routesForward[i];
-}
-
-void WaysForward(int i, long currentCount)
-{
-    
-}
-
-Debugger.Break();
+Console.WriteLine($"Q2: {pathLength[Input[^1]]}");
