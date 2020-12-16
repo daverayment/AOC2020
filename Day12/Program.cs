@@ -10,7 +10,7 @@ string directions = "NESW";
 
 foreach (string line in Input)
 {
-    int distance = int.Parse(line.Substring(1));
+    int distance = int.Parse(line[1..]);
     char command = line[0];
     if (command == 'F')
     {
@@ -44,3 +44,54 @@ foreach (string line in Input)
 }
 
 Console.WriteLine($"Q1: {Math.Abs(north) + Math.Abs(east)}");
+
+int waypointNorth = 1;
+int waypointEast = 10;
+north = 0;
+east = 0;
+heading = 'E';
+
+foreach (string line in Input)
+{
+    int distance = int.Parse(line[1..]);
+    switch (line[0])
+    {
+        case 'F':
+            north += distance * waypointNorth;
+            east += distance * waypointEast;
+            break;
+        case 'N':
+            waypointNorth += distance;
+            break;
+        case 'S':
+            waypointNorth -= distance;
+            break;
+        case 'E':
+            waypointEast += distance;
+            break;
+        case 'W':
+            waypointEast -= distance;
+            break;
+        case 'R':
+            (waypointNorth, waypointEast) = DoRotate(waypointNorth, waypointEast, distance);
+            break;
+        case 'L':
+            (waypointNorth, waypointEast) = DoRotate(waypointNorth, waypointEast, 360 - distance);
+            break;
+        default:
+            break;
+    }
+}
+
+static (int, int) DoRotate(int n, int e, int degrees)
+{
+    return degrees switch
+    {
+        90  => (-e,  n),
+        180 => (-n, -e),
+        270 => ( e, -n),
+        _   => throw new Exception("Invalid rotation.")
+    };
+}
+
+Console.WriteLine($"Q2: {Math.Abs(north) + Math.Abs(east)}");
