@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 States currentState = States.ReadingFieldRanges;
 List<TicketField> fields = new();
 int scanningErrorRate = 0;
-string myTicket = "";
+List<int> myTicket = new();
 List<int[]> validTickets = new();
 
 foreach (string line in File.ReadAllLines("Input.txt"))
@@ -40,7 +40,7 @@ foreach (string line in File.ReadAllLines("Input.txt"))
             }
             else
             {
-                myTicket = line;
+                myTicket = line.Split(',').Select(x => int.Parse(x)).ToList();
             }
 
             break;
@@ -79,9 +79,7 @@ for (int place = 0; place < numPlaces; place++)
         bool valid = true;
         foreach (var ticket in validTickets)
         {
-            int val = ticket[place];
-            if (!((val >= fields[f].Low1 && val <= fields[f].High1) ||
-                (val >= fields[f].Low2 && val <= fields[f].High2)))
+            if (!IsValidValue(ticket[place], fields[f]))
             {
                 valid = false;
                 break;
@@ -97,7 +95,6 @@ for (int place = 0; place < numPlaces; place++)
 
 List<int> used = new();
 long total = 1;
-int[] myTicketVals = myTicket.Split(',').Select(x => int.Parse(x)).ToArray();
 
 foreach (var field in validFields.OrderBy(x => x.Value.Count))
 {
@@ -107,10 +104,10 @@ foreach (var field in validFields.OrderBy(x => x.Value.Count))
 
     if (fields[validField].Name.StartsWith("departure"))
     {
-        Console.WriteLine(myTicketVals[place]);
-        total *= myTicketVals[place];
+        // Console.WriteLine(myTicket[place]);
+        total *= myTicket[place];
     }
-    Console.WriteLine($"Assigned place {place} to field {validField} ({fields[validField].Name})");
+    // Console.WriteLine($"Assigned place {place} to field {validField} ({fields[validField].Name})");
 }
 
 Console.WriteLine($"Q2: {total}");
@@ -122,8 +119,7 @@ IEnumerable<int> GetInvalidValues(string line)
         bool isValid = false;
         foreach (var field in fields)
         {
-            if ((val >= field.Low1 && val <= field.High1) ||
-                (val >= field.Low2 && val <= field.High2))
+            if (IsValidValue(val, field))
             {
                 isValid = true;
                 break;
@@ -135,6 +131,12 @@ IEnumerable<int> GetInvalidValues(string line)
         }
     }
     yield break;
+}
+
+bool IsValidValue(int value, TicketField field)
+{
+    return (value >= field.Low1 && value <= field.High1) ||
+        (value >= field.Low2 && value <= field.High2);
 }
 
 public record TicketField(string Name, int Low1, int High1, int Low2, int High2);
