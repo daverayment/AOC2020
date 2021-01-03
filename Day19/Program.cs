@@ -19,7 +19,7 @@ do
             toUpdate.Update(rule);
         }
     }
-} while (!rules.First(x => x.Key == "0").IsFinal());
+} while (!rules.First(x => x.Id == "0").IsFinal());
 
 Console.WriteLine($"Q1: {TotalMatches()}");  // 136
 Console.WriteLine($"Q2: {TotalMatches(true)}"); // 256
@@ -40,7 +40,7 @@ int TotalMatches(bool isQ2 = false)
         // NB: longest test = 96 characters
         // The minimum required to brute-force match all our tests = 1-4 matches
         string rule11 = $"({rule42}{rule31}|{rule42}{rule42}{rule31}{rule31}|{rule42}{rule42}{rule42}{rule31}{rule31}{rule31}|{rule42}{rule42}{rule42}{rule42}{rule31}{rule31}{rule31}{rule31})";
-        // This non-brute-force solutionover-matches by 2 for some reason :(
+        // This non-brute-force solution over-matches by 2 for some reason :(
 //        string rule11 = $"((?<Open>{rule42})|(?<Content-Open>{rule31}))+(?(Open)(?!))";
         regex = $"^{rule8}{rule11}$";
     }
@@ -61,39 +61,14 @@ int TotalMatches(bool isQ2 = false)
     return total;
 }
 
-static string MakeRegex(List<Rule> rules, string ruleId, bool isQ2 = false)
+static string MakeRegex(List<Rule> rules, string ruleId)
 {
-    //if (ruleId == "8" && isQ2)
-    //{
-    //    // For Q2 rule 8 ("8: 42 | 42 8") is any number of rule 42, so 
-    //    // this evaluates to "(rule42)+"
-    //    string rule42 = MakeRegex(rules, "42");
-    //    return $"({rule42})+";
-    //}
-    //else if (ruleId == "11" && isQ2)
-    //{
-    //    // Q2 rule 11 ("11: 42 31 | 42 11 31") requires a balanced number 
-    //    // of rule 42 and rule 31, e.g. "42 31" or "42 42 31 31". This can 
-    //    // be achieved using .NET regex balanced groups. Official.NET docs
-    //    // are poor at explaining this construct. Instead see:
-    //    // https://www.codeproject.com/articles/21183/in-depth-with-net-regex-balanced-grouping
-    //    // Example here: http://regexstorm.net/tester?p=%28%28%3f%3cOpen%3eaba%29%7c%28%3f%3cContent-Open%3ebaaab%29%29%2b%28%3f%28Open%29%28%3f!%29%29&i=aaaabaababaaabbaaabaaaaa
-    //    // 
-    //    // (Alternatively, we could brute-force the pattern until it is long 
-    //    // enough to match all our tests.)
-    //    string rule42 = MakeRegex(rules, "42");
-    //    string rule31 = MakeRegex(rules, "31");
-    //    return $"((?<Open>{rule42})|(?<Content-Open>{rule31}))+(?(Open)(?!))";
-    //}
-    //else
-    //{
-        return rules.First(x => x.Key == ruleId).ToString();
-    //}
+    return rules.First(x => x.Id == ruleId).ToString();
 }
 
 public class Rule
 {
-    public string Key { get; }
+    public string Id { get; }
     public List<string> GroupA { get; set; } = new();
     public List<string> GroupB { get; set; } = new();
 
@@ -102,9 +77,9 @@ public class Rule
         bool firstGroup = true;
         foreach (string str in line.Split(' '))
         {
-            if (string.IsNullOrEmpty(Key))
+            if (string.IsNullOrEmpty(Id))
             {
-                Key = str.Trim(':');
+                Id = str.Trim(':');
             }
             else if (str == "|")
             {
@@ -125,14 +100,14 @@ public class Rule
     {
         for (int i = 0; i < GroupA.Count; i++)
         {
-            if (GroupA[i] == r.Key)
+            if (GroupA[i] == r.Id)
             {
                 GroupA[i] = r.ToString();
             }
         }
         for (int i = 0; i < GroupB.Count; i++)
         {
-            if (GroupB[i] == r.Key)
+            if (GroupB[i] == r.Id)
             {
                 GroupB[i] = r.ToString();
             }
